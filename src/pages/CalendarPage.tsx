@@ -8,10 +8,10 @@ interface CalendarPageProps {
 
 export const CalendarPage: React.FC<CalendarPageProps> = ({ tasks, onTaskClick }) => {
   const [viewBy, setViewBy] = useState<'deadline' | 'creation'>('deadline');
+  const [currentDate, setCurrentDate] = useState(new Date());
 
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
 
   const startDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -44,14 +44,31 @@ export const CalendarPage: React.FC<CalendarPageProps> = ({ tasks, onTaskClick }
     <div style={{ maxWidth: '1000px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <h1 style={{ fontSize: '28px', fontWeight: 600, color: '#111827', margin: 0 }}>Calendar</h1>
-        <select
-          value={viewBy}
-          onChange={e => setViewBy(e.target.value as 'deadline' | 'creation')}
-          style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #d1d5db' }}
-        >
-          <option value="deadline">By Deadline</option>
-          <option value="creation">By Creation Date</option>
-        </select>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button
+            onClick={() => setCurrentDate(new Date(year, month - 1, 1))}
+            style={{ border: '1px solid #d1d5db', background: 'white', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}
+          >
+            &lt;
+          </button>
+          <div style={{ fontWeight: 500 }}>
+            {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+          </div>
+          <button
+            onClick={() => setCurrentDate(new Date(year, month + 1, 1))}
+            style={{ border: '1px solid #d1d5db', background: 'white', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}
+          >
+            &gt;
+          </button>
+          <select
+            value={viewBy}
+            onChange={e => setViewBy(e.target.value as 'deadline' | 'creation')}
+            style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+          >
+            <option value="deadline">By Deadline</option>
+            <option value="creation">By Creation Date</option>
+          </select>
+        </div>
       </div>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
