@@ -1,16 +1,12 @@
 import React, { useState } from 'react';
 import { Task, FilterGroup } from './types';
 import { Navigation } from './components/Navigation';
-import { TaskCard } from './components/TaskCard';
 import { TaskModal } from './components/TaskModal';
 import { Dashboard } from './pages/Dashboard';
 import { TasksPage } from './pages/TasksPage';
 import { SettingsPage } from './pages/SettingsPage';
-import { ProjectsPage } from './pages/ProjectsPage';
-import { AIAssistant } from './pages/AIAssistant';
-import { CalendarPage } from './pages/CalendarPage';
 
-// Sample data
+// Sample data (your original data)
 const sampleTasks: Task[] = [
   {
     id: '1',
@@ -106,13 +102,37 @@ const App = () => {
     };
 
     switch (currentPage) {
-      case 'dashboard': return <Dashboard {...commonProps} />;
-      case 'tasks': return <TasksPage {...commonProps} />;
-      case 'projects': return <ProjectsPage />;
-      case 'ai': return <AIAssistant />;
-      case 'calendar': return <CalendarPage />;
-      case 'settings': return <SettingsPage filterGroups={filterGroups} setFilterGroups={setFilterGroups} />;
-      default: return <Dashboard {...commonProps} />;
+      case 'dashboard': 
+        return <Dashboard {...commonProps} />;
+      case 'tasks': 
+        return <TasksPage {...commonProps} />;
+      case 'projects': 
+        return (
+          <div style={{ padding: '20px' }}>
+            <h1>Projects</h1>
+            <p>Projects feature coming soon...</p>
+          </div>
+        );
+      case 'ai': 
+        return (
+          <div style={{ padding: '20px' }}>
+            <h1>AI Assistant</h1>
+            <p>AI assistant feature coming soon...</p>
+          </div>
+        );
+      case 'calendar': 
+        return (
+          <div style={{ padding: '20px' }}>
+            <h1>Calendar</h1>
+            <p>Calendar view coming soon...</p>
+          </div>
+        );
+      case 'settings': 
+        return 
+          <SettingsPage filterGroups={filterGroups} setFilterGroups={setFilterGroups} />
+        ;
+      default: 
+        return <Dashboard {...commonProps} />;
     }
   };
 
