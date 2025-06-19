@@ -7,14 +7,12 @@ interface DashboardProps {
   tasks: Task[];
   filterGroups: FilterGroup[];
   onTaskClick: (task: Task) => void;
-  onShowTaskModal: () => void;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({
   tasks,
   filterGroups,
   onTaskClick,
-  onShowTaskModal
 }) => {
   const todayTasks = tasks.filter(task => {
     const today = new Date();
