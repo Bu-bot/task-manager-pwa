@@ -1,15 +1,29 @@
 import React from 'react';
-import { CheckCircle2, Circle, Calendar, Clock, AlertCircle, XCircle, ChevronRight } from 'lucide-react';
+import {
+  CheckCircle2,
+  Circle,
+  Calendar,
+  XCircle,
+  ChevronRight,
+  X
+} from 'lucide-react';
 import { Task, FilterGroup } from '../types';
 
 interface TaskCardProps {
   task: Task;
   filterGroups: FilterGroup[];
   onTaskClick: (task: Task) => void;
+  onDeleteTask?: (id: string) => void; // ✅ Made optional
   viewMode?: 'grid' | 'list';
 }
 
-export const TaskCard: React.FC<TaskCardProps> = ({ task, filterGroups, onTaskClick, viewMode = 'grid' }) => {
+export const TaskCard: React.FC<TaskCardProps> = ({
+  task,
+  filterGroups,
+  onTaskClick,
+  onDeleteTask,
+  viewMode = 'grid'
+}) => {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high': return '#dc2626';
@@ -33,7 +47,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, filterGroups, onTaskCl
     const now = new Date();
     const diffTime = date.getTime() - now.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
     if (diffDays < 0) return 'Overdue';
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Tomorrow';
@@ -43,7 +56,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, filterGroups, onTaskCl
 
   const getTaskTags = () => {
     const allTags: { id: string; name: string; color: string }[] = [];
-    
     filterGroups.forEach(group => {
       group.items.forEach(item => {
         if (task.tags.includes(item.id)) {
@@ -51,15 +63,13 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, filterGroups, onTaskCl
         }
       });
     });
-    
     return allTags;
   };
 
   const isOverdue = task.deadline && new Date(task.deadline) < new Date() && task.status !== 'complete';
-  const isDueSoon = task.deadline && !isOverdue && 
+  const isDueSoon = task.deadline && !isOverdue &&
     (new Date(task.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24) <= 2;
 
-  // Compact list view for better density
   if (viewMode === 'list') {
     return (
       <div
@@ -73,7 +83,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, filterGroups, onTaskCl
           borderRadius: '6px',
           cursor: 'pointer',
           transition: 'all 0.2s',
-          gap: '12px'
+          gap: '12px',
+          position: 'relative'
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = '#f9fafb';
@@ -84,6 +95,28 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, filterGroups, onTaskCl
           e.currentTarget.style.borderColor = '#e5e7eb';
         }}
       >
+        {/* Delete Button */}
+        {onDeleteTask && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteTask(task.id);
+            }}
+            style={{
+              position: 'absolute',
+              top: '6px',
+              right: '6px',
+              background: 'transparent',
+              border: 'none',
+              color: '#ef4444',
+              cursor: 'pointer'
+            }}
+            title="Delete Task"
+          >
+            <X size={16} />
+          </button>
+        )}
+
         {/* Status Icon */}
         <div style={{ flexShrink: 0 }}>
           {task.status === 'complete' ? (
@@ -98,17 +131,17 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, filterGroups, onTaskCl
         </div>
 
         {/* Priority Indicator */}
-        <div style={{ 
-          width: '3px', 
-          height: '24px', 
+        <div style={{
+          width: '3px',
+          height: '24px',
           backgroundColor: getPriorityColor(task.priority),
           borderRadius: '2px',
           flexShrink: 0
         }} />
 
         {/* Title */}
-        <div style={{ 
-          flex: '1', 
+        <div style={{
+          flex: '1',
           minWidth: 0,
           fontSize: '14px',
           fontWeight: '500',
@@ -121,15 +154,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, filterGroups, onTaskCl
           {task.title}
         </div>
 
-        {/* Tags - Compact */}
-        <div style={{ 
-          display: 'flex', 
-          gap: '4px', 
+        {/* Tags */}
+        <div style={{
+          display: 'flex',
+          gap: '4px',
           flexShrink: 0,
           maxWidth: '40%',
           overflow: 'hidden'
         }}>
-          {getTaskTags().slice(0, 3).map((tag, index) => (
+          {getTaskTags().slice(0, 3).map(tag => (
             <span
               key={tag.id}
               style={{
@@ -161,9 +194,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, filterGroups, onTaskCl
 
         {/* Due Date */}
         {task.deadline && (
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
             gap: '4px',
             flexShrink: 0,
             fontSize: '12px',
@@ -174,13 +207,12 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, filterGroups, onTaskCl
           </div>
         )}
 
-        {/* Hover Action */}
         <ChevronRight size={16} style={{ color: '#9ca3af', flexShrink: 0 }} />
       </div>
     );
   }
 
-  // Original grid view card
+  // === Grid view ===
   return (
     <div
       onClick={() => onTaskClick(task)}
@@ -203,7 +235,29 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, filterGroups, onTaskCl
         e.currentTarget.style.transform = 'translateY(0)';
       }}
     >
-      {/* Priority stripe */}
+      {/* Delete Button */}
+      {onDeleteTask && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDeleteTask(task.id);
+          }}
+          style={{
+            position: 'absolute',
+            top: '8px',
+            right: '8px',
+            background: 'transparent',
+            border: 'none',
+            color: '#ef4444',
+            cursor: 'pointer'
+          }}
+          title="Delete Task"
+        >
+          <X size={16} />
+        </button>
+      )}
+
+      {/* Priority Stripe */}
       <div style={{
         position: 'absolute',
         left: 0,
@@ -213,10 +267,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, filterGroups, onTaskCl
         backgroundColor: getPriorityColor(task.priority)
       }} />
 
-      {/* Title */}
-      <h3 style={{ 
-        fontSize: '15px', 
-        fontWeight: '600', 
+      <h3 style={{
+        fontSize: '15px',
+        fontWeight: '600',
         margin: '0 0 8px 0',
         color: '#111827',
         lineHeight: '1.2'
@@ -224,11 +277,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, filterGroups, onTaskCl
         {task.title}
       </h3>
 
-      {/* Description - single line only */}
       {task.description && (
-        <p style={{ 
-          fontSize: '13px', 
-          color: '#6b7280', 
+        <p style={{
+          fontSize: '13px',
+          color: '#6b7280',
           margin: '0 0 10px 0',
           whiteSpace: 'nowrap',
           overflow: 'hidden',
@@ -238,16 +290,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, filterGroups, onTaskCl
         </p>
       )}
 
-      {/* Metadata row - compact */}
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
         gap: '8px',
         marginBottom: '10px',
         fontSize: '12px',
         color: '#6b7280'
       }}>
-        {/* Status icon and priority */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           {task.status === 'complete' ? (
             <CheckCircle2 size={14} style={{ color: getStatusColor(task.status) }} />
@@ -256,12 +306,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, filterGroups, onTaskCl
           ) : (
             <Circle size={14} style={{ color: '#d1d5db' }} />
           )}
-          <span style={{ color: getPriorityColor(task.priority), fontWeight: '500', textTransform: 'capitalize' }}>
+          <span style={{
+            color: getPriorityColor(task.priority),
+            fontWeight: '500',
+            textTransform: 'capitalize'
+          }}>
             {task.priority}
           </span>
         </div>
 
-        {/* Due date */}
         {task.deadline && (
           <span style={{
             display: 'flex',
@@ -276,7 +329,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, filterGroups, onTaskCl
         )}
       </div>
 
-      {/* Tags - more compact */}
       {getTaskTags().length > 0 && (
         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
           {getTaskTags().map(tag => (
