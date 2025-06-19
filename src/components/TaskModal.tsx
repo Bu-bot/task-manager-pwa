@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { Task, FilterGroup } from '../types';
+import { parseLocalDate } from '../utils/date';
 
 interface TaskModalProps {
   show: boolean;
@@ -68,7 +69,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       priority: formData.priority,
       dateAdded: task ? task.dateAdded : new Date(),
       dateModified: new Date(),
-      deadline: formData.deadline ? new Date(formData.deadline) : undefined,
+      deadline: formData.deadline ? parseLocalDate(formData.deadline) : undefined,
       dateCompleted: formData.status === 'complete' ? new Date() : undefined,
       estimatedTime: formData.estimatedTime ? parseInt(formData.estimatedTime) : undefined,
       actualTimeSpent: task?.actualTimeSpent,
