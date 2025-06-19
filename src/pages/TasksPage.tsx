@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Filter, Search, Plus, Grid, List, Layers } from 'lucide-react';
 import { Task, FilterGroup } from '../types';
 import { TaskCard } from '../components/TaskCard';
+import { DeleteConfirmationModal } from '../components/DeleteConfirmationModal';
 
 interface TasksPageProps {
   tasks: Task[];
@@ -27,11 +28,39 @@ export const TasksPage: React.FC<TasksPageProps> = ({
   const [groupByFilter, setGroupByFilter] = useState<string>('');
   const [showGroupByMenu, setShowGroupByMenu] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
+  const [lastDeletedTask, setLastDeletedTask] = useState<{ task: Task; index: number } | null>(null);
 
-  // ✅ Delete handler
-  const handleDeleteTask = (id: string) => {
-    setTasks(prev => prev.filter(task => task.id !== id));
+  // request delete confirmation
+  const requestDeleteTask = (id: string) => {
+    const task = tasks.find(t => t.id === id);
+    if (task) setTaskToDelete(task);
   };
+
+  const confirmDeleteTask = () => {
+    if (!taskToDelete) return;
+    const index = tasks.findIndex(t => t.id === taskToDelete.id);
+    setTasks(prev => prev.filter(task => task.id !== taskToDelete.id));
+    setLastDeletedTask({ task: taskToDelete, index });
+    setTaskToDelete(null);
+  };
+
+  const handleUndoDelete = () => {
+    if (!lastDeletedTask) return;
+    setTasks(prev => {
+      const newTasks = [...prev];
+      newTasks.splice(lastDeletedTask.index, 0, lastDeletedTask.task);
+      return newTasks;
+    });
+    setLastDeletedTask(null);
+  };
+
+  useEffect(() => {
+    if (lastDeletedTask) {
+      const timer = setTimeout(() => setLastDeletedTask(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [lastDeletedTask]);
 
   // Filter tasks
   const filteredTasks = tasks.filter(task => {
@@ -85,12 +114,45 @@ export const TasksPage: React.FC<TasksPageProps> = ({
   };
 
   return (
+    <>
     <div style={{ display: 'flex', height: 'calc(100vh - 48px)' }}>
       {/* SIDEBAR... (unchanged, omitted for brevity) */}
 
       {/* MAIN CONTENT */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        {/* HEADER, FILTER BAR... (unchanged, omitted for brevity) */}
+        {/* Page Header */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '24px'
+        }}>
+          <h1 style={{
+            fontSize: '32px',
+            fontWeight: 600,
+            color: '#111827',
+            margin: 0
+          }}>Tasks</h1>
+          <button
+            onClick={onShowTaskModal}
+            style={{
+              backgroundColor: '#2563eb',
+              color: 'white',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontWeight: '500',
+              fontSize: '14px'
+            }}
+          >
+            <Plus size={16} />
+            Add Task
+          </button>
+        </div>
 
         {/* Tasks Grid/List/Group */}
         <div style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>
@@ -153,7 +215,7 @@ export const TasksPage: React.FC<TasksPageProps> = ({
                               task={task}
                               filterGroups={filterGroups}
                               onTaskClick={onTaskClick}
-                              onDeleteTask={handleDeleteTask} // ✅ here
+                              onDeleteTask={requestDeleteTask}
                               viewMode="list"
                             />
                           ))}
@@ -178,7 +240,7 @@ export const TasksPage: React.FC<TasksPageProps> = ({
                     task={task}
                     filterGroups={filterGroups}
                     onTaskClick={onTaskClick}
-                    onDeleteTask={handleDeleteTask} // ✅ here
+                    onDeleteTask={requestDeleteTask}
                     viewMode={viewMode as 'grid' | 'list'}
                   />
                 ))}
@@ -201,5 +263,41 @@ export const TasksPage: React.FC<TasksPageProps> = ({
         </div>
       </div>
     </div>
+    <DeleteConfirmationModal
+      show={!!taskToDelete}
+      onConfirm={confirmDeleteTask}
+      onCancel={() => setTaskToDelete(null)}
+    />
+    {lastDeletedTask && (
+      <div style={{
+        position: 'fixed',
+        bottom: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        backgroundColor: '#374151',
+        color: 'white',
+        padding: '12px 16px',
+        borderRadius: '6px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        zIndex: 100
+      }}>
+        <span>Task deleted</span>
+        <button
+          onClick={handleUndoDelete}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#93c5fd',
+            cursor: 'pointer',
+            textDecoration: 'underline'
+          }}
+        >
+          Undo
+        </button>
+      </div>
+    )}
+    </>
   );
 };
