@@ -41,64 +41,75 @@ export const CalendarPage: React.FC<CalendarPageProps> = ({ tasks, onTaskClick }
   const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div style={{ maxWidth: '1000px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: 600, color: '#111827', margin: 0 }}>Calendar</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+    <div className="max-w-5xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800 m-0">Calendar</h1>
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setCurrentDate(new Date(year, month - 1, 1))}
-            style={{ border: '1px solid #d1d5db', background: 'white', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}
+            className="border px-2 py-1 rounded bg-white hover:bg-gray-100"
           >
             &lt;
           </button>
-          <div style={{ fontWeight: 500 }}>
+          <div className="font-medium text-lg">
             {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
           </div>
           <button
             onClick={() => setCurrentDate(new Date(year, month + 1, 1))}
-            style={{ border: '1px solid #d1d5db', background: 'white', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' }}
+            className="border px-2 py-1 rounded bg-white hover:bg-gray-100"
           >
             &gt;
           </button>
           <select
             value={viewBy}
             onChange={e => setViewBy(e.target.value as 'deadline' | 'creation')}
-            style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #d1d5db' }}
+            className="border rounded px-3 py-2"
           >
             <option value="deadline">By Deadline</option>
             <option value="creation">By Creation Date</option>
           </select>
         </div>
       </div>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <table className="w-full border-collapse">
         <thead>
           <tr>
             {daysOfWeek.map(d => (
-              <th key={d} style={{ padding: '8px', color: '#6b7280', fontWeight: 500 }}>{d}</th>
+              <th key={d} className="p-2 text-gray-500 font-medium">
+                {d}
+              </th>
             ))}
           </tr>
         </thead>
         <tbody>
           {weeks.map((week, idx) => (
             <tr key={idx}>
-              {week.map((day, i) => (
-                <td key={i} style={{ border: '1px solid #e5e7eb', verticalAlign: 'top', height: '100px', padding: '4px' }}>
-                  {day && (
-                    <div>
-                      <div style={{ fontWeight: 600, marginBottom: '4px' }}>{day}</div>
-                      {getTasksForDay(day).map(task => (
-                        <div
-                          key={task.id}
-                          onClick={() => onTaskClick(task)}
-                          style={{ fontSize: '12px', marginBottom: '2px', cursor: 'pointer' }}
-                        >
-                          {task.title}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </td>
-              ))}
+              {week.map((day, i) => {
+                const today = new Date();
+                const isToday =
+                  day === today.getDate() &&
+                  month === today.getMonth() &&
+                  year === today.getFullYear();
+                return (
+                  <td key={i} className="border align-top h-28 p-1">
+                    {day && (
+                      <div
+                        className={`h-full p-1 rounded ${isToday ? 'bg-blue-50 border border-blue-200' : ''}`}
+                      >
+                        <div className="font-semibold text-sm mb-1">{day}</div>
+                        {getTasksForDay(day).map(task => (
+                          <div
+                            key={task.id}
+                            onClick={() => onTaskClick(task)}
+                            className="text-xs mb-0.5 cursor-pointer truncate hover:underline"
+                          >
+                            {task.title}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>
