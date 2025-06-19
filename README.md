@@ -2,6 +2,10 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Calendar
+
+The Calendar page now displays tasks for each day. Use the arrows next to the month name to navigate between months and choose whether tasks are shown by **deadline** or **creation date** using the dropdown.
+
 ## Available Scripts
 
 In the project directory, you can run:
