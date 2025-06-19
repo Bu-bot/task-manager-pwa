@@ -6,6 +6,7 @@ import { Dashboard } from './pages/Dashboard';
 import { TasksPage } from './pages/TasksPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { CalendarPage } from './pages/CalendarPage';
+import { parseLocalDate } from './utils/date';
 
 // Sample data with more tasks
 const sampleTasks: Task[] = [
@@ -15,9 +16,9 @@ const sampleTasks: Task[] = [
     description: 'Draft the Q2 project proposal for client review',
     status: 'in-progress',
     priority: 'high',
-    dateAdded: new Date('2024-06-10'),
-    dateModified: new Date('2024-06-15'),
-    deadline: new Date('2024-06-20'),
+    dateAdded: parseLocalDate('2024-06-10'),
+    dateModified: parseLocalDate('2024-06-15'),
+    deadline: parseLocalDate('2024-06-20'),
     createdBy: 'user1',
     tags: ['urgent', 'bank-of-america', 'quarterly-review']
   },
@@ -27,9 +28,9 @@ const sampleTasks: Task[] = [
     description: 'Provide feedback on the latest UI mockups',
     status: 'todo',
     priority: 'medium',
-    dateAdded: new Date('2024-06-12'),
-    dateModified: new Date('2024-06-12'),
-    deadline: new Date('2024-06-18'),
+    dateAdded: parseLocalDate('2024-06-12'),
+    dateModified: parseLocalDate('2024-06-12'),
+    deadline: parseLocalDate('2024-06-18'),
     createdBy: 'user1',
     tags: ['design', 'marketing', 'website-redesign']
   },
@@ -39,9 +40,9 @@ const sampleTasks: Task[] = [
     description: 'Prepare slides and talking points for Microsoft quarterly review',
     status: 'todo',
     priority: 'high',
-    dateAdded: new Date('2024-06-14'),
-    dateModified: new Date('2024-06-14'),
-    deadline: new Date('2024-06-19'),
+    dateAdded: parseLocalDate('2024-06-14'),
+    dateModified: parseLocalDate('2024-06-14'),
+    deadline: parseLocalDate('2024-06-19'),
     createdBy: 'user1',
     tags: ['urgent', 'microsoft', 'quarterly-review', 'steve-johnson']
   },
@@ -51,9 +52,9 @@ const sampleTasks: Task[] = [
     description: 'Implement new fields for user preferences',
     status: 'complete',
     priority: 'low',
-    dateAdded: new Date('2024-06-08'),
-    dateModified: new Date('2024-06-13'),
-    dateCompleted: new Date('2024-06-13'),
+    dateAdded: parseLocalDate('2024-06-08'),
+    dateModified: parseLocalDate('2024-06-13'),
+    dateCompleted: parseLocalDate('2024-06-13'),
     createdBy: 'user1',
     tags: ['backend', 'engineering', 'john-doe']
   },
@@ -63,9 +64,9 @@ const sampleTasks: Task[] = [
     description: 'Review PR #234 for security best practices',
     status: 'in-progress',
     priority: 'medium',
-    dateAdded: new Date('2024-06-15'),
-    dateModified: new Date('2024-06-16'),
-    deadline: new Date('2024-06-17'),
+    dateAdded: parseLocalDate('2024-06-15'),
+    dateModified: parseLocalDate('2024-06-16'),
+    deadline: parseLocalDate('2024-06-17'),
     createdBy: 'user1',
     tags: ['backend', 'engineering', 'security', 'sarah-williams']
   },
@@ -75,9 +76,9 @@ const sampleTasks: Task[] = [
     description: 'Draft announcement for v2.0 release',
     status: 'on-hold',
     priority: 'low',
-    dateAdded: new Date('2024-06-11'),
-    dateModified: new Date('2024-06-14'),
-    deadline: new Date('2024-06-25'),
+    dateAdded: parseLocalDate('2024-06-11'),
+    dateModified: parseLocalDate('2024-06-14'),
+    deadline: parseLocalDate('2024-06-25'),
     createdBy: 'user1',
     tags: ['content', 'marketing', 'website-redesign']
   },
@@ -87,9 +88,9 @@ const sampleTasks: Task[] = [
     description: 'Mobile menu not working properly on iOS devices',
     status: 'todo',
     priority: 'high',
-    dateAdded: new Date('2024-06-16'),
-    dateModified: new Date('2024-06-16'),
-    deadline: new Date('2024-06-18'),
+    dateAdded: parseLocalDate('2024-06-16'),
+    dateModified: parseLocalDate('2024-06-16'),
+    deadline: parseLocalDate('2024-06-18'),
     createdBy: 'user1',
     tags: ['bug', 'design', 'engineering', 'urgent']
   },
@@ -99,9 +100,9 @@ const sampleTasks: Task[] = [
     description: 'Gather all receipts and documents for Q2 filing',
     status: 'todo',
     priority: 'medium',
-    dateAdded: new Date('2024-06-10'),
-    dateModified: new Date('2024-06-10'),
-    deadline: new Date('2024-06-30'),
+    dateAdded: parseLocalDate('2024-06-10'),
+    dateModified: parseLocalDate('2024-06-10'),
+    deadline: parseLocalDate('2024-06-30'),
     createdBy: 'user1',
     tags: ['finance', 'quarterly-review']
   },
@@ -111,9 +112,9 @@ const sampleTasks: Task[] = [
     description: 'Set up accounts and schedule orientation for new developer',
     status: 'todo',
     priority: 'medium',
-    dateAdded: new Date('2024-06-15'),
-    dateModified: new Date('2024-06-15'),
-    deadline: new Date('2024-06-22'),
+    dateAdded: parseLocalDate('2024-06-15'),
+    dateModified: parseLocalDate('2024-06-15'),
+    deadline: parseLocalDate('2024-06-22'),
     createdBy: 'user1',
     tags: ['hr', 'john-doe', 'microsoft']
   },
@@ -123,8 +124,8 @@ const sampleTasks: Task[] = [
     description: 'Analyze and improve slow database queries',
     status: 'cancelled',
     priority: 'low',
-    dateAdded: new Date('2024-06-05'),
-    dateModified: new Date('2024-06-12'),
+    dateAdded: parseLocalDate('2024-06-05'),
+    dateModified: parseLocalDate('2024-06-12'),
     createdBy: 'user1',
     tags: ['backend', 'engineering']
   }
