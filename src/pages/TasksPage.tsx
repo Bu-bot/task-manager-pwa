@@ -120,7 +120,39 @@ export const TasksPage: React.FC<TasksPageProps> = ({
 
       {/* MAIN CONTENT */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        {/* HEADER, FILTER BAR... (unchanged, omitted for brevity) */}
+        {/* Page Header */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '24px'
+        }}>
+          <h1 style={{
+            fontSize: '32px',
+            fontWeight: 600,
+            color: '#111827',
+            margin: 0
+          }}>Tasks</h1>
+          <button
+            onClick={onShowTaskModal}
+            style={{
+              backgroundColor: '#2563eb',
+              color: 'white',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontWeight: '500',
+              fontSize: '14px'
+            }}
+          >
+            <Plus size={16} />
+            Add Task
+          </button>
+        </div>
 
         {/* Tasks Grid/List/Group */}
         <div style={{ flex: 1, padding: '24px', overflowY: 'auto' }}>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, CheckSquare } from 'lucide-react';
+import { CheckSquare } from 'lucide-react';
 import { Task, FilterGroup } from '../types';
 import { TaskCard } from '../components/TaskCard';
 
@@ -44,25 +44,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           color: '#111827',
           margin: 0
         }}>Dashboard</h1>
-        <button 
-          onClick={onShowTaskModal}
-          style={{
-            backgroundColor: '#2563eb',
-            color: 'white',
-            padding: '12px 16px',
-            borderRadius: '8px',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            fontWeight: '500',
-            fontSize: '14px'
-          }}
-        >
-          <Plus size={16} />
-          Add Task
-        </button>
+        {/* Add Task button moved to Tasks page */}
       </div>
 
       {/* Stats Cards */}
