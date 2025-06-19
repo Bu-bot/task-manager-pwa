@@ -133,25 +133,165 @@ export const TasksPage: React.FC<TasksPageProps> = ({
             color: '#111827',
             margin: 0
           }}>Tasks</h1>
-          <button
-            onClick={onShowTaskModal}
-            style={{
-              backgroundColor: '#2563eb',
-              color: 'white',
-              padding: '12px 16px',
-              borderRadius: '8px',
-              border: 'none',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontWeight: '500',
-              fontSize: '14px'
-            }}
-          >
-            <Plus size={16} />
-            Add Task
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', border: '1px solid #d1d5db', borderRadius: '6px', position: 'relative' }}>
+              <button
+                onClick={() => setViewMode('grid')}
+                style={{
+                  padding: '8px 12px',
+                  border: 'none',
+                  backgroundColor: viewMode === 'grid' ? '#2563eb' : 'white',
+                  color: viewMode === 'grid' ? 'white' : '#6b7280',
+                  cursor: 'pointer',
+                  borderRadius: '5px 0 0 5px'
+                }}
+              >
+                <Grid size={16} />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                style={{
+                  padding: '8px 12px',
+                  border: 'none',
+                  backgroundColor: viewMode === 'list' ? '#2563eb' : 'white',
+                  color: viewMode === 'list' ? 'white' : '#6b7280',
+                  cursor: 'pointer',
+                  borderRight: '1px solid #d1d5db'
+                }}
+              >
+                <List size={16} />
+              </button>
+              <button
+                onClick={() => {
+                  if (viewMode !== 'group') {
+                    setShowGroupByMenu(!showGroupByMenu);
+                  } else {
+                    setViewMode('grid');
+                    setGroupByFilter('');
+                  }
+                }}
+                style={{
+                  padding: '8px 12px',
+                  border: 'none',
+                  backgroundColor: viewMode === 'group' ? '#2563eb' : 'white',
+                  color: viewMode === 'group' ? 'white' : '#6b7280',
+                  cursor: 'pointer',
+                  borderRadius: '0 5px 5px 0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <Layers size={16} />
+                {viewMode === 'group' && (
+                  <span style={{ fontSize: '12px', fontWeight: '500' }}>
+                    {filterGroups.find(g => g.id === groupByFilter)?.name}
+                  </span>
+                )}
+              </button>
+
+              {showGroupByMenu && viewMode !== 'group' && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: '4px',
+                  backgroundColor: 'white',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                  minWidth: '180px',
+                  zIndex: 10
+                }}>
+                  <div style={{ padding: '8px', borderBottom: '1px solid #e5e7eb' }}>
+                    <p style={{ fontSize: '12px', color: '#6b7280', margin: 0, fontWeight: '500' }}>
+                      Group tasks by:
+                    </p>
+                  </div>
+                  {filterGroups.map(group => (
+                    <button
+                      key={group.id}
+                      onClick={() => {
+                        setGroupByFilter(group.id);
+                        setViewMode('group');
+                        setShowGroupByMenu(false);
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        border: 'none',
+                        backgroundColor: 'white',
+                        color: '#374151',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontSize: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                    >
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        backgroundColor: group.color,
+                        borderRadius: '2px'
+                      }} />
+                      {group.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={onShowTaskModal}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#2563eb',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontWeight: '500'
+              }}
+            >
+              <Plus size={16} />
+              Add Task
+            </button>
+          </div>
+        </div>
+
+        {/* Search Bar */}
+        <div style={{ padding: '16px 24px', background: '#f9fafb' }}>
+          <div style={{ position: 'relative', maxWidth: '400px' }}>
+            <Search size={16} style={{
+              position: 'absolute',
+              left: '12px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#9ca3af'
+            }} />
+            <input
+              type="text"
+              placeholder="Search tasks..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 12px 10px 36px',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                fontSize: '14px',
+                backgroundColor: 'white',
+                boxSizing: 'border-box'
+              }}
+            />
+          </div>
         </div>
 
         {/* Tasks Grid/List/Group */}
