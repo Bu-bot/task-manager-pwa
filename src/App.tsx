@@ -5,6 +5,7 @@ import { TaskModal } from './components/TaskModal';
 import { Dashboard } from './pages/Dashboard';
 import { TasksPage } from './pages/TasksPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { CalendarPage } from './pages/CalendarPage';
 
 // Sample data with more tasks
 const sampleTasks: Task[] = [
@@ -243,15 +244,19 @@ const App = () => {
       setTasks,
       filterGroups,
       setFilterGroups,
-      onTaskClick: handleTaskClick,
-      onShowTaskModal: () => setShowTaskModal(true)
+      onTaskClick: handleTaskClick
     };
 
     switch (currentPage) {
-      case 'dashboard': 
+      case 'dashboard':
         return <Dashboard {...commonProps} />;
-      case 'tasks': 
-        return <TasksPage {...commonProps} />;
+      case 'tasks':
+        return (
+          <TasksPage
+            {...commonProps}
+            onShowTaskModal={() => setShowTaskModal(true)}
+          />
+        );
       case 'projects': 
         return (
           <div style={{ padding: '20px' }}>
@@ -266,14 +271,9 @@ const App = () => {
             <p>AI assistant feature coming soon...</p>
           </div>
         );
-      case 'calendar': 
-        return (
-          <div style={{ padding: '20px' }}>
-            <h1>Calendar</h1>
-            <p>Calendar view coming soon...</p>
-          </div>
-        );
-      case 'settings': 
+      case 'calendar':
+        return <CalendarPage tasks={tasks} onTaskClick={handleTaskClick} />;
+      case 'settings':
         return <SettingsPage filterGroups={filterGroups} setFilterGroups={setFilterGroups} />;
       default: 
         return <Dashboard {...commonProps} />;
