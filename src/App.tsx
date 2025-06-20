@@ -10,63 +10,12 @@ import { CalendarPage } from './pages/CalendarPage';
 import { apiService } from './services/api';
 import { Menu, X, User, LogOut } from 'lucide-react';
 
-// Sample filter groups for fallback (will be replaced by API data)
-const sampleFilterGroups: FilterGroup[] = [
-  {
-    id: 'tags',
-    name: 'Tags',
-    color: '#6b7280',
-    items: [
-      { id: 'urgent', name: 'Urgent', color: '#dc2626' },
-      { id: 'design', name: 'Design', color: '#8b5cf6' },
-      { id: 'bug', name: 'Bug', color: '#ef4444' },
-      { id: 'content', name: 'Content', color: '#3b82f6' },
-      { id: 'security', name: 'Security', color: '#f59e0b' },
-      { id: 'quarterly-review', name: 'Quarterly Review', color: '#10b981' },
-      { id: 'website-redesign', name: 'Website Redesign', color: '#ec4899' }
-    ]
-  },
-  {
-    id: 'clients',
-    name: 'Clients',
-    color: '#3b82f6',
-    items: [
-      { id: 'bank-of-america', name: 'Bank of America', color: '#3b82f6' },
-      { id: 'microsoft', name: 'Microsoft', color: '#059669' },
-      { id: 'apple', name: 'Apple', color: '#6b7280' },
-      { id: 'google', name: 'Google', color: '#ea4335' }
-    ]
-  },
-  {
-    id: 'departments',
-    name: 'Departments',
-    color: '#8b5cf6',
-    items: [
-      { id: 'marketing', name: 'Marketing', color: '#ec4899' },
-      { id: 'engineering', name: 'Engineering', color: '#3b82f6' },
-      { id: 'backend', name: 'Backend', color: '#10b981' },
-      { id: 'hr', name: 'Human Resources', color: '#f59e0b' },
-      { id: 'finance', name: 'Finance', color: '#84cc16' }
-    ]
-  },
-  {
-    id: 'people',
-    name: 'People',
-    color: '#10b981',
-    items: [
-      { id: 'john-doe', name: 'John Doe', color: '#06b6d4' },
-      { id: 'sarah-williams', name: 'Sarah Williams', color: '#d946ef' },
-      { id: 'steve-johnson', name: 'Steve Johnson', color: '#f97316' }
-    ]
-  }
-];
-
 const App = () => {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [currentUser, setCurrentUser] = useState(apiService.getCurrentUser());
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [filterGroups, setFilterGroups] = useState<FilterGroup[]>(sampleFilterGroups);
+  const [filterGroups, setFilterGroups] = useState<FilterGroup[]>([]);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -131,19 +80,47 @@ const App = () => {
         }),
         apiService.getFilterGroups().catch(err => {
           console.error('Failed to load filter groups:', err);
-          return sampleFilterGroups;
+          return [];
         })
       ]);
 
       setTasks(tasksData);
       setProjects(projectsData);
-      setFilterGroups(filterGroupsData.length > 0 ? filterGroupsData : sampleFilterGroups);
+      
+      // Only set filter groups from API, no fallback to sample data
+      setFilterGroups(filterGroupsData);
+      setIsInitialLoad(false); // Mark that initial load is complete
+      
+      // If no filter groups exist, we'll let the user create them in Settings
+      if (filterGroupsData.length === 0) {
+        console.log('No filter groups found. User can create them in Settings.');
+      }
     } catch (error) {
       console.error('Error loading user data:', error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Save filter groups to API whenever they change (but only if user made the change)
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  
+  useEffect(() => {
+    const saveFilterGroups = async () => {
+      if (currentUser && connectionStatus === 'connected' && filterGroups.length > 0 && !isInitialLoad) {
+        try {
+          await apiService.saveFilterGroups(filterGroups);
+          console.log('Filter groups saved successfully');
+        } catch (error) {
+          console.error('Failed to save filter groups:', error);
+        }
+      }
+    };
+
+    // Debounce the save operation
+    const timeoutId = setTimeout(saveFilterGroups, 500);
+    return () => clearTimeout(timeoutId);
+  }, [filterGroups, currentUser, connectionStatus, isInitialLoad]);
 
   const handleLogin = (user: any) => {
     setCurrentUser(user);
@@ -154,7 +131,7 @@ const App = () => {
     setCurrentUser(null);
     setTasks([]);
     setProjects([]);
-    setFilterGroups(sampleFilterGroups);
+    setFilterGroups([]);
     setCurrentPage('dashboard');
     setShowUserMenu(false);
   };

@@ -340,15 +340,19 @@ class ApiService {
       }
 
       const filterGroupsData = await response.json();
-      return filterGroupsData.map((group: any) => ({
+      
+      // Handle both array response and object with filterGroups property
+      const groups = Array.isArray(filterGroupsData) ? filterGroupsData : filterGroupsData.filterGroups || [];
+      
+      return groups.map((group: any) => ({
         id: group.id,
         name: group.name,
         color: group.color,
-        items: group.items.map((item: any) => ({
+        items: group.items?.map((item: any) => ({
           id: item.id,
           name: item.name,
           color: item.color,
-        })),
+        })) || [],
       }));
     } catch (error) {
       console.error('Error fetching filter groups:', error);
