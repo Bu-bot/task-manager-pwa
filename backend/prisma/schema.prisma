@@ -21,7 +21,6 @@ model User {
   tasks         Task[]
   projects      Project[]
   filterGroups  FilterGroup[]
-  filterItems   FilterItem[]
 
   @@map("users")
 }
@@ -44,7 +43,6 @@ model Task {
   // Relations
   user             User      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
   projects         ProjectTask[]
-  filterItems      TaskFilter[]
 
   @@map("tasks")
 }
@@ -62,39 +60,34 @@ model Project {
   // Relations
   user         User          @relation(fields: [createdBy], references: [id], onDelete: Cascade)
   tasks        ProjectTask[]
-  filterItems  ProjectFilter[]
 
   @@map("projects")
 }
 
 model FilterGroup {
-  id        String   @id @default(cuid())
+  id        String   @id
   name      String
   color     String
-  sortOrder Int      @default(0)
   userId    String
   createdAt DateTime @default(now())
-
-  // Relations
+  updatedAt DateTime @updatedAt
+  
   user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   items     FilterItem[]
-
+  
   @@map("filter_groups")
 }
 
 model FilterItem {
-  id      String @id @default(cuid())
-  name    String
-  color   String
-  groupId String
-  userId  String
-
-  // Relations
-  group        FilterGroup    @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tasks        TaskFilter[]
-  projects     ProjectFilter[]
-
+  id            String      @id
+  name          String
+  color         String
+  filterGroupId String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  filterGroup   FilterGroup @relation(fields: [filterGroupId], references: [id], onDelete: Cascade)
+  
   @@map("filter_items")
 }
 
@@ -108,28 +101,6 @@ model ProjectTask {
 
   @@id([projectId, taskId])
   @@map("project_tasks")
-}
-
-model TaskFilter {
-  taskId       String
-  filterItemId String
-
-  task         Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  filterItem   FilterItem @relation(fields: [filterItemId], references: [id], onDelete: Cascade)
-
-  @@id([taskId, filterItemId])
-  @@map("task_filters")
-}
-
-model ProjectFilter {
-  projectId    String
-  filterItemId String
-
-  project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  filterItem   FilterItem @relation(fields: [filterItemId], references: [id], onDelete: Cascade)
-
-  @@id([projectId, filterItemId])
-  @@map("project_filters")
 }
 
 // Enums
@@ -159,32 +130,4 @@ enum ProjectStatus {
   ARCHIVED
 
   @@map("project_status")
-}
-
-// Add these models to your schema.prisma file
-
-model FilterGroup {
-  id        String   @id
-  name      String
-  color     String
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  items     FilterItem[]
-  
-  @@map("filter_groups")
-}
-
-model FilterItem {
-  id            String      @id
-  name          String
-  color         String
-  filterGroupId String
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  
-  filterGroup   FilterGroup @relation(fields: [filterGroupId], references: [id], onDelete: Cascade)
-  
-  @@map("filter_items")
 }
