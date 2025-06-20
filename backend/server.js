@@ -6,21 +6,6 @@ const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 8000;
 
-// Initialize database schema on startup
-async function initializeDatabase() {
-  try {
-    // This will ensure the database schema exists
-    await prisma.$connect();
-    console.log('✅ Database connected successfully');
-  } catch (error) {
-    console.error('❌ Database connection failed:', error);
-    process.exit(1);
-  }
-}
-
-// Initialize database before starting server
-initializeDatabase();
-
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -306,8 +291,14 @@ app.post('/api/filter-groups/bulk', async (req, res) => {
   try {
     const { filterGroups, userId } = req.body;
     
+    console.log('📝 Bulk save request:', { userId, groupCount: filterGroups?.length });
+    
     if (!userId) {
       return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    if (!filterGroups || !Array.isArray(filterGroups)) {
+      return res.status(400).json({ error: 'Filter groups array is required' });
     }
 
     // Start a transaction to ensure data consistency
@@ -330,6 +321,8 @@ app.post('/api/filter-groups/bulk', async (req, res) => {
 
       // Create new filter groups and items
       for (const group of filterGroups) {
+        console.log(`Creating group: ${group.name} with ${group.items?.length || 0} items`);
+        
         await tx.filterGroup.create({
           data: {
             id: group.id,
@@ -337,21 +330,22 @@ app.post('/api/filter-groups/bulk', async (req, res) => {
             color: group.color,
             userId: userId,
             items: {
-              create: group.items.map(item => ({
+              create: group.items?.map(item => ({
                 id: item.id,
                 name: item.name,
                 color: item.color
-              }))
+              })) || []
             }
           }
         });
       }
     });
 
+    console.log('✅ Filter groups saved successfully');
     res.json({ success: true, message: 'Filter groups saved successfully' });
   } catch (error) {
-    console.error('Error bulk saving filter groups:', error);
-    res.status(500).json({ error: 'Failed to save filter groups' });
+    console.error('❌ Error bulk saving filter groups:', error);
+    res.status(500).json({ error: 'Failed to save filter groups', details: error.message });
   }
 });
 

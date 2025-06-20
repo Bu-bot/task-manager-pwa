@@ -371,14 +371,18 @@ class ApiService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          filterGroups,
+          filterGroups: filterGroups,
           userId: this.currentUser.id,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save filter groups');
+        const errorText = await response.text();
+        console.error('Save filter groups error:', errorText);
+        throw new Error(`Failed to save filter groups: ${response.status}`);
       }
+
+      console.log('✅ Filter groups saved successfully');
     } catch (error) {
       console.error('Error saving filter groups:', error);
       throw error;
