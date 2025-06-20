@@ -1,7 +1,7 @@
 // src/services/api.ts
 import { Task, Project, FilterGroup, FilterItem } from '../types';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://task-manager-pwa-production.up.railway.app';
 
 class ApiService {
   private baseUrl: string;
