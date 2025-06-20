@@ -114,315 +114,207 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   if (!show) return null;
 
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 50
-    }}>
-      <div style={{
-        background: 'white',
-        borderRadius: '8px',
-        padding: '24px',
-        width: '100%',
-        maxWidth: '600px',
-        margin: '16px',
-        maxHeight: '90vh',
-        overflowY: 'auto'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0 }}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+      {/* Mobile: Full screen modal, Desktop: Centered modal */}
+      <div className="bg-white w-full h-full sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-2xl sm:rounded-lg shadow-xl flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-white sticky top-0 z-10">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
             {task ? 'Edit Task' : 'Create New Task'}
           </h2>
           <button
             onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#9ca3af',
-              cursor: 'pointer',
-              padding: '4px'
-            }}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <X size={20} />
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* Title */}
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>
-              Title *
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => handleChange('title', e.target.value)}
-              placeholder="Enter task title..."
-              required
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                fontSize: '14px',
-                boxSizing: 'border-box'
-              }}
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>
-              Description
-            </label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => handleChange('description', e.target.value)}
-              placeholder="Enter task description..."
-              rows={3}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                fontSize: '14px',
-                resize: 'vertical',
-                boxSizing: 'border-box'
-              }}
-            />
-          </div>
-
-          {/* Status and Priority Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        {/* Form Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6">
+            {/* Title */}
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>
-                Status
-              </label>
-              <select
-                value={formData.status}
-                onChange={(e) => handleChange('status', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  backgroundColor: 'white',
-                  boxSizing: 'border-box'
-                }}
-              >
-                <option value="todo">To Do</option>
-                <option value="in-progress">In Progress</option>
-                <option value="on-hold">On Hold</option>
-                <option value="complete">Complete</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>
-                Priority
-              </label>
-              <select
-                value={formData.priority}
-                onChange={(e) => handleChange('priority', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  backgroundColor: 'white',
-                  boxSizing: 'border-box'
-                }}
-              >
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
-                <option value="none">None</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Deadline and Estimated Time Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>
-                Deadline
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Title *
               </label>
               <input
-                type="date"
-                value={formData.deadline}
-                onChange={(e) => handleChange('deadline', e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box'
-                }}
+                type="text"
+                value={formData.title}
+                onChange={(e) => handleChange('title', e.target.value)}
+                placeholder="Enter task title..."
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
             </div>
 
+            {/* Description */}
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>
-                Estimated Time (hours)
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Description
               </label>
-              <input
-                type="number"
-                value={formData.estimatedTime}
-                onChange={(e) => handleChange('estimatedTime', e.target.value)}
-                placeholder="0"
-                min="0"
-                step="0.5"
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  boxSizing: 'border-box'
-                }}
+              <textarea
+                value={formData.description}
+                onChange={(e) => handleChange('description', e.target.value)}
+                placeholder="Enter task description..."
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none transition-colors"
               />
             </div>
-          </div>
 
-          {/* Filter Groups Selection */}
-          <div>
-            <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>
-              Categories & Tags
-            </label>
-            
-            {/* Selected Tags Display */}
-            {formData.selectedTags.length > 0 && (
-              <div style={{ marginBottom: '12px', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                {formData.selectedTags.map(tagId => (
-                  <span
-                    key={tagId}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      padding: '4px 8px',
-                      fontSize: '12px',
-                      backgroundColor: getTagColor(tagId),
-                      color: 'white',
-                      borderRadius: '12px',
-                      fontWeight: '500'
-                    }}
-                  >
-                    {getTagDisplay(tagId)}
-                    <button
-                      type="button"
-                      onClick={() => toggleTag(tagId)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: 'white',
-                        cursor: 'pointer',
-                        padding: '0',
-                        display: 'flex',
-                        alignItems: 'center'
-                      }}
+            {/* Status and Priority Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Status
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => handleChange('status', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                >
+                  <option value="todo">To Do</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="on-hold">On Hold</option>
+                  <option value="complete">Complete</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Priority
+                </label>
+                <select
+                  value={formData.priority}
+                  onChange={(e) => handleChange('priority', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                >
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                  <option value="none">None</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Deadline and Estimated Time Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Deadline
+                </label>
+                <input
+                  type="date"
+                  value={formData.deadline}
+                  onChange={(e) => handleChange('deadline', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Estimated Time (hours)
+                </label>
+                <input
+                  type="number"
+                  value={formData.estimatedTime}
+                  onChange={(e) => handleChange('estimatedTime', e.target.value)}
+                  placeholder="0"
+                  min="0"
+                  step="0.5"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            {/* Filter Groups Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Categories & Tags
+              </label>
+              
+              {/* Selected Tags Display */}
+              {formData.selectedTags.length > 0 && (
+                <div className="mb-4 flex flex-wrap gap-2">
+                  {formData.selectedTags.map(tagId => (
+                    <span
+                      key={tagId}
+                      className="inline-flex items-center gap-2 px-3 py-1 text-sm rounded-full text-white font-medium"
+                      style={{ backgroundColor: getTagColor(tagId) }}
                     >
-                      <X size={12} />
-                    </button>
-                  </span>
+                      {getTagDisplay(tagId)}
+                      <button
+                        type="button"
+                        onClick={() => toggleTag(tagId)}
+                        className="text-white hover:text-gray-200 transition-colors"
+                      >
+                        <X size={14} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Filter Groups */}
+              <div className="border border-gray-300 rounded-lg p-4 max-h-64 overflow-y-auto bg-gray-50">
+                {filterGroups.map(group => (
+                  <div key={group.id} className="mb-4 last:mb-0">
+                    <h4 
+                      className="text-sm font-semibold mb-3 uppercase tracking-wide"
+                      style={{ color: group.color }}
+                    >
+                      {group.name}
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {group.items.map(item => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => toggleTag(item.id)}
+                          className={`px-3 py-2 text-sm rounded-lg border-2 transition-all ${
+                            formData.selectedTags.includes(item.id)
+                              ? 'border-current text-white font-medium'
+                              : 'border-gray-300 text-gray-700 bg-white hover:border-gray-400'
+                          }`}
+                          style={formData.selectedTags.includes(item.id) 
+                            ? { backgroundColor: item.color, borderColor: item.color }
+                            : {}
+                          }
+                        >
+                          {item.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
-            )}
-
-            {/* Filter Groups */}
-            <div style={{
-              border: '1px solid #d1d5db',
-              borderRadius: '6px',
-              padding: '12px',
-              maxHeight: '200px',
-              overflowY: 'auto',
-              backgroundColor: '#f9fafb'
-            }}>
-              {filterGroups.map(group => (
-                <div key={group.id} style={{ marginBottom: '16px' }}>
-                  <h4 style={{
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    color: group.color,
-                    margin: '0 0 8px 0',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px'
-                  }}>
-                    {group.name}
-                  </h4>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                    {group.items.map(item => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => toggleTag(item.id)}
-                        style={{
-                          padding: '6px 12px',
-                          fontSize: '12px',
-                          border: formData.selectedTags.includes(item.id) ? `2px solid ${item.color}` : '1px solid #d1d5db',
-                          borderRadius: '16px',
-                          backgroundColor: formData.selectedTags.includes(item.id) ? `${item.color}20` : 'white',
-                          color: formData.selectedTags.includes(item.id) ? item.color : '#374151',
-                          cursor: 'pointer',
-                          fontWeight: formData.selectedTags.includes(item.id) ? '600' : '400',
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        {item.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
+              <p className="text-xs text-gray-500 mt-2">
+                Select items from different categories. Manage categories in Settings.
+              </p>
             </div>
-            <p style={{ fontSize: '12px', color: '#6b7280', margin: '4px 0 0 0' }}>
-              Select items from different categories. Manage categories in Settings.
-            </p>
-          </div>
+          </form>
+        </div>
 
-          {/* Action Buttons */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '8px' }}>
+        {/* Action Buttons - Sticky footer */}
+        <div className="border-t border-gray-200 p-4 sm:p-6 bg-white">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
             <button
               type="button"
               onClick={onClose}
-              style={{
-                padding: '10px 20px',
-                color: '#6b7280',
-                backgroundColor: 'transparent',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}
+              className="w-full sm:w-auto px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#2563eb',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: '500'
-              }}
+              onClick={handleSubmit}
+              className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
             >
               {task ? 'Update Task' : 'Create Task'}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

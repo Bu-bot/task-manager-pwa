@@ -5,15 +5,25 @@ import {
   FolderOpen, 
   Bot, 
   Calendar,
-  Settings
+  Settings,
+  X
 } from 'lucide-react';
 
 interface NavigationProps {
   currentPage: string;
   onPageChange: (page: string) => void;
+  isMobile: boolean;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export const Navigation: React.FC<NavigationProps> = ({ currentPage, onPageChange }) => {
+export const Navigation: React.FC<NavigationProps> = ({ 
+  currentPage, 
+  onPageChange, 
+  isMobile, 
+  isOpen, 
+  onClose 
+}) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'tasks', label: 'Tasks', icon: CheckSquare },
@@ -23,71 +33,91 @@ export const Navigation: React.FC<NavigationProps> = ({ currentPage, onPageChang
     { id: 'settings', label: 'Settings', icon: Settings }
   ];
 
+  const handlePageChange = (pageId: string) => {
+    onPageChange(pageId);
+    if (isMobile) {
+      onClose();
+    }
+  };
+
+  // Mobile Navigation (Slide-in sidebar)
+  if (isMobile) {
+    return (
+      <nav 
+        className={`fixed top-0 left-0 h-full w-72 bg-white border-r border-gray-200 z-50 transform transition-transform duration-300 ease-in-out ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+        style={{ boxShadow: isOpen ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none' }}
+      >
+        {/* Mobile Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <h1 className="text-xl font-semibold text-gray-900">
+            Task Manager
+          </h1>
+          <button
+            onClick={onClose}
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Mobile Menu Items */}
+        <div className="py-4">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = currentPage === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handlePageChange(item.id)}
+                className={`w-full flex items-center px-6 py-3 text-left transition-colors ${
+                  isActive 
+                    ? 'bg-blue-50 text-blue-700 border-r-3 border-blue-600' 
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Icon size={20} className="mr-3 flex-shrink-0" />
+                <span className="font-medium">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+    );
+  }
+
+  // Desktop Navigation (Fixed sidebar)
   return (
-    <nav style={{
-      background: 'white',
-      borderRight: '1px solid #e5e7eb',
-      width: '260px',
-      height: '100vh',
-      position: 'fixed',
-      left: 0,
-      top: 0,
-      overflowY: 'auto',
-      padding: '24px',
-      boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-      zIndex: 10
-    }}>
-      <h1 style={{
-        fontSize: '20px',
-        fontWeight: '600',
-        color: '#111827',
-        marginBottom: '32px',
-        margin: 0
-      }}>Task Manager</h1>
-      <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+    <nav className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen fixed left-0 top-0 z-30">
+      {/* Desktop Header */}
+      <div className="p-6 border-b border-gray-200">
+        <h1 className="text-xl font-semibold text-gray-900">
+          Task Manager
+        </h1>
+      </div>
+
+      {/* Desktop Menu Items */}
+      <div className="flex-1 py-6">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentPage === item.id;
           return (
-            <li key={item.id} style={{ marginBottom: '8px' }}>
-              <button
-                onClick={() => onPageChange(item.id)}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '12px 16px',
-                  textAlign: 'left',
-                  borderRadius: '8px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  transition: 'all 0.2s',
-                  backgroundColor: isActive ? '#eff6ff' : 'transparent',
-                  color: isActive ? '#1d4ed8' : '#374151',
-                  borderWidth: isActive ? '1px' : '0',
-                  borderStyle: 'solid',
-                  borderColor: isActive ? '#bfdbfe' : 'transparent'
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.backgroundColor = '#f3f4f6';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }
-                }}
-              >
-                <Icon size={20} style={{ marginRight: '12px' }} />
-                {item.label}
-              </button>
-            </li>
+            <button
+              key={item.id}
+              onClick={() => onPageChange(item.id)}
+              className={`w-full flex items-center px-6 py-3 mx-3 mb-1 rounded-lg text-left transition-all ${
+                isActive 
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200' 
+                  : 'text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <Icon size={20} className="mr-3 flex-shrink-0" />
+              <span className="font-medium">{item.label}</span>
+            </button>
           );
         })}
-      </ul>
+      </div>
     </nav>
   );
 };

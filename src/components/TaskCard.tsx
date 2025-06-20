@@ -5,7 +5,8 @@ import {
   Calendar,
   XCircle,
   ChevronRight,
-  X
+  X,
+  Clock
 } from 'lucide-react';
 import { Task, FilterGroup } from '../types';
 
@@ -13,7 +14,7 @@ interface TaskCardProps {
   task: Task;
   filterGroups: FilterGroup[];
   onTaskClick: (task: Task) => void;
-  onDeleteTask?: (id: string) => void; // ✅ Made optional
+  onDeleteTask?: (id: string) => void;
   viewMode?: 'grid' | 'list';
 }
 
@@ -74,26 +75,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     return (
       <div
         onClick={() => onTaskClick(task)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '12px 16px',
-          backgroundColor: 'white',
-          border: '1px solid #e5e7eb',
-          borderRadius: '6px',
-          cursor: 'pointer',
-          transition: 'all 0.2s',
-          gap: '12px',
-          position: 'relative'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#f9fafb';
-          e.currentTarget.style.borderColor = '#d1d5db';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'white';
-          e.currentTarget.style.borderColor = '#e5e7eb';
-        }}
+        className="flex items-center p-3 sm:p-4 bg-white border border-gray-200 rounded-lg cursor-pointer transition-all hover:bg-gray-50 hover:border-gray-300 relative group"
       >
         {/* Delete Button */}
         {onDeleteTask && (
@@ -102,138 +84,85 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               e.stopPropagation();
               onDeleteTask(task.id);
             }}
-            style={{
-              position: 'absolute',
-              top: '6px',
-              right: '6px',
-              background: 'transparent',
-              border: 'none',
-              color: '#ef4444',
-              cursor: 'pointer'
-            }}
+            className="absolute top-2 right-2 p-1 text-red-500 opacity-0 group-hover:opacity-100 hover:bg-red-50 rounded transition-all sm:opacity-100"
             title="Delete Task"
           >
-            <X size={16} />
+            <X size={14} />
           </button>
         )}
 
         {/* Status Icon */}
-        <div style={{ flexShrink: 0 }}>
+        <div className="flex-shrink-0 mr-3">
           {task.status === 'complete' ? (
-            <CheckCircle2 size={18} style={{ color: '#10b981' }} />
+            <CheckCircle2 size={20} className="text-green-500" />
           ) : task.status === 'in-progress' ? (
-            <Circle size={18} style={{ color: '#3b82f6' }} />
+            <Circle size={20} className="text-blue-500" />
           ) : task.status === 'cancelled' ? (
-            <XCircle size={18} style={{ color: '#6b7280' }} />
+            <XCircle size={20} className="text-gray-500" />
           ) : (
-            <Circle size={18} style={{ color: '#d1d5db' }} />
+            <Circle size={20} className="text-gray-300" />
           )}
         </div>
 
         {/* Priority Indicator */}
-        <div style={{
-          width: '3px',
-          height: '24px',
-          backgroundColor: getPriorityColor(task.priority),
-          borderRadius: '2px',
-          flexShrink: 0
-        }} />
+        <div 
+          className="w-1 h-6 rounded-full flex-shrink-0 mr-3"
+          style={{ backgroundColor: getPriorityColor(task.priority) }}
+        />
 
-        {/* Title */}
-        <div style={{
-          flex: '1',
-          minWidth: 0,
-          fontSize: '14px',
-          fontWeight: '500',
-          color: task.status === 'complete' ? '#6b7280' : '#111827',
-          textDecoration: task.status === 'complete' ? 'line-through' : 'none',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis'
-        }}>
-          {task.title}
-        </div>
-
-        {/* Tags */}
-        <div style={{
-          display: 'flex',
-          gap: '4px',
-          flexShrink: 0,
-          maxWidth: '40%',
-          overflow: 'hidden'
-        }}>
-          {getTaskTags().slice(0, 3).map(tag => (
-            <span
-              key={tag.id}
-              style={{
-                padding: '2px 6px',
-                backgroundColor: tag.color,
-                color: 'white',
-                borderRadius: '10px',
-                fontSize: '11px',
-                fontWeight: '500',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              {tag.name}
-            </span>
-          ))}
-          {getTaskTags().length > 3 && (
-            <span style={{
-              padding: '2px 6px',
-              backgroundColor: '#e5e7eb',
-              color: '#6b7280',
-              borderRadius: '10px',
-              fontSize: '11px',
-              fontWeight: '500'
-            }}>
-              +{getTaskTags().length - 3}
-            </span>
-          )}
-        </div>
-
-        {/* Due Date */}
-        {task.deadline && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            flexShrink: 0,
-            fontSize: '12px',
-            color: isOverdue ? '#dc2626' : isDueSoon ? '#f59e0b' : '#6b7280'
-          }}>
-            <Calendar size={14} />
-            {formatDate(task.deadline)}
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          {/* Title */}
+          <div className={`text-sm sm:text-base font-medium mb-1 truncate ${
+            task.status === 'complete' ? 'text-gray-500 line-through' : 'text-gray-900'
+          }`}>
+            {task.title}
           </div>
-        )}
 
-        <ChevronRight size={16} style={{ color: '#9ca3af', flexShrink: 0 }} />
+          {/* Tags and Due Date - Mobile: Stack, Desktop: Inline */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+            {/* Tags */}
+            {getTaskTags().length > 0 && (
+              <div className="flex gap-1 flex-wrap">
+                {getTaskTags().slice(0, 2).map(tag => (
+                  <span
+                    key={tag.id}
+                    className="px-2 py-1 text-xs font-medium text-white rounded-md"
+                    style={{ backgroundColor: tag.color }}
+                  >
+                    {tag.name}
+                  </span>
+                ))}
+                {getTaskTags().length > 2 && (
+                  <span className="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-md">
+                    +{getTaskTags().length - 2}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Due Date */}
+            {task.deadline && (
+              <div className={`flex items-center gap-1 text-xs ${
+                isOverdue ? 'text-red-600' : isDueSoon ? 'text-orange-600' : 'text-gray-500'
+              }`}>
+                <Calendar size={12} />
+                <span>{formatDate(task.deadline)}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <ChevronRight size={16} className="text-gray-400 flex-shrink-0 ml-2" />
       </div>
     );
   }
 
-  // === Grid view ===
+  // Grid view
   return (
     <div
       onClick={() => onTaskClick(task)}
-      style={{
-        background: 'white',
-        border: '1px solid #e5e7eb',
-        borderRadius: '8px',
-        padding: '12px 16px',
-        cursor: 'pointer',
-        transition: 'all 0.2s',
-        position: 'relative',
-        overflow: 'hidden'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
-        e.currentTarget.style.transform = 'translateY(-2px)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = 'none';
-        e.currentTarget.style.transform = 'translateY(0)';
-      }}
+      className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer transition-all hover:shadow-md hover:-translate-y-1 relative group"
     >
       {/* Delete Button */}
       {onDeleteTask && (
@@ -242,15 +171,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             e.stopPropagation();
             onDeleteTask(task.id);
           }}
-          style={{
-            position: 'absolute',
-            top: '8px',
-            right: '8px',
-            background: 'transparent',
-            border: 'none',
-            color: '#ef4444',
-            cursor: 'pointer'
-          }}
+          className="absolute top-3 right-3 p-1 text-red-500 opacity-0 group-hover:opacity-100 hover:bg-red-50 rounded transition-all sm:opacity-100"
           title="Delete Task"
         >
           <X size={16} />
@@ -258,90 +179,69 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       )}
 
       {/* Priority Stripe */}
-      <div style={{
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        bottom: 0,
-        width: '4px',
-        backgroundColor: getPriorityColor(task.priority)
-      }} />
+      <div 
+        className="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
+        style={{ backgroundColor: getPriorityColor(task.priority) }}
+      />
 
-      <h3 style={{
-        fontSize: '15px',
-        fontWeight: '600',
-        margin: '0 0 8px 0',
-        color: '#111827',
-        lineHeight: '1.2'
-      }}>
+      {/* Title */}
+      <h3 className="text-base font-semibold mb-2 text-gray-900 pr-6 line-clamp-2">
         {task.title}
       </h3>
 
+      {/* Description */}
       {task.description && (
-        <p style={{
-          fontSize: '13px',
-          color: '#6b7280',
-          margin: '0 0 10px 0',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis'
-        }}>
+        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
           {task.description}
         </p>
       )}
 
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        marginBottom: '10px',
-        fontSize: '12px',
-        color: '#6b7280'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      {/* Status, Priority, and Due Date */}
+      <div className="flex flex-col gap-2 mb-3">
+        {/* Status and Priority */}
+        <div className="flex items-center gap-2">
           {task.status === 'complete' ? (
-            <CheckCircle2 size={14} style={{ color: getStatusColor(task.status) }} />
+            <CheckCircle2 size={16} style={{ color: getStatusColor(task.status) }} />
           ) : task.status === 'in-progress' ? (
-            <Circle size={14} style={{ color: getStatusColor(task.status) }} />
+            <Circle size={16} style={{ color: getStatusColor(task.status) }} />
           ) : (
-            <Circle size={14} style={{ color: '#d1d5db' }} />
+            <Circle size={16} className="text-gray-300" />
           )}
-          <span style={{
-            color: getPriorityColor(task.priority),
-            fontWeight: '500',
-            textTransform: 'capitalize'
-          }}>
+          <span 
+            className="text-sm font-medium capitalize"
+            style={{ color: getPriorityColor(task.priority) }}
+          >
             {task.priority}
           </span>
         </div>
 
-        {task.deadline && (
-          <span style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '3px',
-            fontSize: '12px',
-            color: isOverdue ? '#dc2626' : isDueSoon ? '#f59e0b' : '#6b7280'
-          }}>
-            <Calendar size={12} />
-            {formatDate(task.deadline)}
-          </span>
-        )}
+        {/* Due Date and Estimated Time */}
+        <div className="flex items-center gap-3 text-xs text-gray-500">
+          {task.deadline && (
+            <span className={`flex items-center gap-1 ${
+              isOverdue ? 'text-red-600' : isDueSoon ? 'text-orange-600' : 'text-gray-500'
+            }`}>
+              <Calendar size={12} />
+              {formatDate(task.deadline)}
+            </span>
+          )}
+          {task.estimatedTime && (
+            <span className="flex items-center gap-1">
+              <Clock size={12} />
+              {task.estimatedTime}h
+            </span>
+          )}
+        </div>
       </div>
 
+      {/* Tags */}
       {getTaskTags().length > 0 && (
-        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+        <div className="flex gap-1 flex-wrap">
           {getTaskTags().map(tag => (
             <span
               key={tag.id}
-              style={{
-                padding: '2px 6px',
-                backgroundColor: tag.color,
-                color: 'white',
-                borderRadius: '10px',
-                fontSize: '11px',
-                fontWeight: '500'
-              }}
+              className="px-2 py-1 text-xs font-medium text-white rounded-md"
+              style={{ backgroundColor: tag.color }}
             >
               {tag.name}
             </span>

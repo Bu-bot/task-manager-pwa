@@ -8,6 +8,7 @@ import { TasksPage } from './pages/TasksPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { CalendarPage } from './pages/CalendarPage';
 import { apiService } from './services/api';
+import { Menu, X, User, LogOut } from 'lucide-react';
 
 // Sample filter groups for fallback (will be replaced by API data)
 const sampleFilterGroups: FilterGroup[] = [
@@ -70,6 +71,29 @@ const App = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Check if screen is mobile
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      // Close mobile menu on resize to desktop
+      if (window.innerWidth >= 768) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Close mobile menu when page changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [currentPage]);
 
   // Check API connection on mount
   useEffect(() => {
@@ -132,6 +156,7 @@ const App = () => {
     setProjects([]);
     setFilterGroups(sampleFilterGroups);
     setCurrentPage('dashboard');
+    setShowUserMenu(false);
   };
 
   const handleTaskClick = (task: Task) => {
@@ -189,32 +214,12 @@ const App = () => {
   // Show connection status while checking
   if (connectionStatus === 'checking') {
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#f9fafb'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: '40px',
-            height: '40px',
-            border: '4px solid #e5e7eb',
-            borderTop: '4px solid #3b82f6',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 16px'
-          }}></div>
-          <p style={{ color: '#6b7280', fontSize: '16px' }}>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 text-sm sm:text-base">
             Connecting to server...
           </p>
-          <style>{`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}</style>
         </div>
       </div>
     );
@@ -223,74 +228,26 @@ const App = () => {
   // Show offline mode if disconnected
   if (connectionStatus === 'disconnected') {
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#f9fafb'
-      }}>
-        <div style={{
-          backgroundColor: 'white',
-          padding: '48px',
-          borderRadius: '12px',
-          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-          textAlign: 'center',
-          maxWidth: '400px'
-        }}>
-          <div style={{
-            fontSize: '48px',
-            marginBottom: '16px'
-          }}>⚠️</div>
-          <h2 style={{
-            fontSize: '24px',
-            fontWeight: '600',
-            color: '#1f2937',
-            marginBottom: '8px'
-          }}>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="bg-white p-6 sm:p-12 rounded-xl shadow-lg text-center max-w-md w-full">
+          <div className="text-4xl mb-4">⚠️</div>
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">
             Connection Failed
           </h2>
-          <p style={{
-            color: '#6b7280',
-            marginBottom: '24px'
-          }}>
+          <p className="text-gray-600 mb-6 text-sm sm:text-base">
             Unable to connect to the server. Please make sure your backend is running on localhost:8000
           </p>
           <button
             onClick={() => window.location.reload()}
-            style={{
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              padding: '12px 24px',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer'
-            }}
+            className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-blue-700 transition-colors"
           >
             Retry Connection
           </button>
-          <div style={{
-            marginTop: '24px',
-            padding: '16px',
-            backgroundColor: '#f3f4f6',
-            borderRadius: '8px',
-            fontSize: '14px',
-            color: '#6b7280',
-            textAlign: 'left'
-          }}>
-            <p style={{ margin: 0, marginBottom: '8px' }}>
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg text-xs sm:text-sm text-gray-600 text-left">
+            <p className="mb-2">
               <strong>To start the backend:</strong>
             </p>
-            <code style={{
-              display: 'block',
-              backgroundColor: '#1f2937',
-              color: '#f9fafb',
-              padding: '8px',
-              borderRadius: '4px',
-              fontSize: '12px'
-            }}>
+            <code className="block bg-gray-900 text-gray-100 p-2 rounded text-xs">
               cd D:\dev\task-manager-pwa\backend<br/>
               npm run dev
             </code>
@@ -303,24 +260,10 @@ const App = () => {
   // Show loading screen
   if (isLoading) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#f9fafb'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: '40px',
-            height: '40px',
-            border: '4px solid #e5e7eb',
-            borderTop: '4px solid #3b82f6',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 16px'
-          }}></div>
-          <p style={{ color: '#6b7280', fontSize: '16px' }}>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 text-sm sm:text-base">
             Loading your data...
           </p>
         </div>
@@ -350,16 +293,16 @@ const App = () => {
         );
       case 'projects': 
         return (
-          <div style={{ padding: '20px' }}>
-            <h1>Projects</h1>
-            <p>Projects feature coming soon...</p>
+          <div className="p-4 sm:p-6">
+            <h1 className="text-2xl font-semibold mb-4">Projects</h1>
+            <p className="text-gray-600">Projects feature coming soon...</p>
           </div>
         );
       case 'ai': 
         return (
-          <div style={{ padding: '20px' }}>
-            <h1>AI Assistant</h1>
-            <p>AI assistant feature coming soon...</p>
+          <div className="p-4 sm:p-6">
+            <h1 className="text-2xl font-semibold mb-4">AI Assistant</h1>
+            <p className="text-gray-600">AI assistant feature coming soon...</p>
           </div>
         );
       case 'calendar':
@@ -372,53 +315,89 @@ const App = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Mobile Navigation Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Navigation */}
       <Navigation 
         currentPage={currentPage} 
-        onPageChange={setCurrentPage} 
+        onPageChange={setCurrentPage}
+        isMobile={isMobile}
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
       />
-      
-      {/* User info and logout button */}
-      <div style={{
-        position: 'fixed',
-        top: '20px',
-        right: '20px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        backgroundColor: 'white',
-        padding: '8px 16px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-        zIndex: 1000
-      }}>
-        <span style={{ fontSize: '14px', color: '#6b7280' }}>
-          {currentUser?.name || currentUser?.email}
-        </span>
-        <button
-          onClick={handleLogout}
-          style={{
-            backgroundColor: '#ef4444',
-            color: 'white',
-            border: 'none',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            fontSize: '12px',
-            cursor: 'pointer'
-          }}
-        >
-          Logout
-        </button>
-      </div>
 
-      <main style={{ 
-        marginLeft: '320px', 
-        padding: '24px',
-        minHeight: '100vh'
-      }}>
-        {renderCurrentPage()}
-      </main>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-w-0 md:ml-64">
+        {/* Mobile Header */}
+        <header className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <Menu size={20} />
+          </button>
+          
+          <h1 className="text-lg font-semibold text-gray-900">
+            Task Manager
+          </h1>
+
+          {/* Mobile User Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <User size={20} />
+            </button>
+
+            {showUserMenu && (
+              <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-48 z-40">
+                <div className="px-4 py-2 text-sm text-gray-600 border-b border-gray-100">
+                  {currentUser?.name || currentUser?.email}
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                >
+                  <LogOut size={16} />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        </header>
+
+        {/* Desktop User Info */}
+        <div className="hidden md:block fixed top-4 right-4 z-30">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 px-4 py-2 flex items-center gap-3">
+            <span className="text-sm text-gray-600 truncate max-w-32">
+              {currentUser?.name || currentUser?.email}
+            </span>
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600 transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+
+        {/* Page Content */}
+        <main className="flex-1 overflow-auto">
+          <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto">
+            {renderCurrentPage()}
+          </div>
+        </main>
+      </div>
       
+      {/* Task Modal */}
       <TaskModal
         show={showTaskModal}
         task={selectedTask}
@@ -427,6 +406,14 @@ const App = () => {
         onClose={handleTaskModalClose}
         onSave={handleTaskSave}
       />
+
+      {/* Click outside to close user menu */}
+      {showUserMenu && (
+        <div 
+          className="fixed inset-0 z-20"
+          onClick={() => setShowUserMenu(false)}
+        />
+      )}
     </div>
   );
 };
