@@ -332,6 +332,10 @@ class ApiService {
       const response = await fetch(`${this.baseUrl}/api/filter-groups?${params}`);
       
       if (!response.ok) {
+        if (response.status === 404) {
+          // No filter groups found, return empty array
+          return [];
+        }
         throw new Error('Failed to fetch filter groups');
       }
 
@@ -348,6 +352,31 @@ class ApiService {
       }));
     } catch (error) {
       console.error('Error fetching filter groups:', error);
+      throw error;
+    }
+  }
+
+  // NEW: Save entire filter groups array (for Settings page)
+  async saveFilterGroups(filterGroups: FilterGroup[]): Promise<void> {
+    try {
+      if (!this.currentUser) throw new Error('User not authenticated');
+
+      const response = await fetch(`${this.baseUrl}/api/filter-groups/bulk`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          filterGroups,
+          userId: this.currentUser.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save filter groups');
+      }
+    } catch (error) {
+      console.error('Error saving filter groups:', error);
       throw error;
     }
   }
@@ -385,6 +414,66 @@ class ApiService {
     }
   }
 
+  async updateFilterGroup(groupId: string, groupData: Partial<FilterGroup>): Promise<FilterGroup> {
+    try {
+      if (!this.currentUser) throw new Error('User not authenticated');
+
+      const response = await fetch(`${this.baseUrl}/api/filter-groups/${groupId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: groupData.name,
+          color: groupData.color,
+          userId: this.currentUser.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update filter group');
+      }
+
+      const updatedGroup = await response.json();
+      return {
+        id: updatedGroup.id,
+        name: updatedGroup.name,
+        color: updatedGroup.color,
+        items: updatedGroup.items?.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          color: item.color,
+        })) || [],
+      };
+    } catch (error) {
+      console.error('Error updating filter group:', error);
+      throw error;
+    }
+  }
+
+  async deleteFilterGroup(groupId: string): Promise<void> {
+    try {
+      if (!this.currentUser) throw new Error('User not authenticated');
+
+      const response = await fetch(`${this.baseUrl}/api/filter-groups/${groupId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: this.currentUser.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete filter group');
+      }
+    } catch (error) {
+      console.error('Error deleting filter group:', error);
+      throw error;
+    }
+  }
+
   async createFilterItem(groupId: string, name: string, color: string): Promise<FilterItem> {
     try {
       if (!this.currentUser) throw new Error('User not authenticated');
@@ -414,6 +503,61 @@ class ApiService {
       };
     } catch (error) {
       console.error('Error creating filter item:', error);
+      throw error;
+    }
+  }
+
+  async updateFilterItem(itemId: string, itemData: Partial<FilterItem>): Promise<FilterItem> {
+    try {
+      if (!this.currentUser) throw new Error('User not authenticated');
+
+      const response = await fetch(`${this.baseUrl}/api/filter-items/${itemId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: itemData.name,
+          color: itemData.color,
+          userId: this.currentUser.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update filter item');
+      }
+
+      const updatedItem = await response.json();
+      return {
+        id: updatedItem.id,
+        name: updatedItem.name,
+        color: updatedItem.color,
+      };
+    } catch (error) {
+      console.error('Error updating filter item:', error);
+      throw error;
+    }
+  }
+
+  async deleteFilterItem(itemId: string): Promise<void> {
+    try {
+      if (!this.currentUser) throw new Error('User not authenticated');
+
+      const response = await fetch(`${this.baseUrl}/api/filter-items/${itemId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: this.currentUser.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete filter item');
+      }
+    } catch (error) {
+      console.error('Error deleting filter item:', error);
       throw error;
     }
   }
