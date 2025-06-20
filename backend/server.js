@@ -6,6 +6,21 @@ const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 8000;
 
+// Initialize database schema on startup
+async function initializeDatabase() {
+  try {
+    // This will ensure the database schema exists
+    await prisma.$connect();
+    console.log('✅ Database connected successfully');
+  } catch (error) {
+    console.error('❌ Database connection failed:', error);
+    process.exit(1);
+  }
+}
+
+// Initialize database before starting server
+initializeDatabase();
+
 // Middleware
 app.use(cors());
 app.use(express.json());
