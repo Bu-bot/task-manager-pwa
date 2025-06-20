@@ -39,6 +39,9 @@ app.post('/api/users', async (req, res) => {
           name: name || email.split('@')[0]
         }
       });
+      console.log('✅ Created new user:', user.id);
+    } else {
+      console.log('✅ Found existing user:', user.id);
     }
 
     res.json(user);
@@ -303,6 +306,22 @@ app.post('/api/filter-groups/bulk', async (req, res) => {
 
     // Start a transaction to ensure data consistency
     await prisma.$transaction(async (tx) => {
+      // First, ensure the user exists
+      const user = await tx.user.findUnique({
+        where: { id: userId }
+      });
+      
+      if (!user) {
+        console.log(`⚠️ User ${userId} not found, creating user`);
+        await tx.user.create({
+          data: {
+            id: userId,
+            email: 'demo@example.com', // Default email
+            name: 'Demo User'
+          }
+        });
+      }
+
       // Delete existing filter items for this user
       await tx.filterItem.deleteMany({
         where: {
