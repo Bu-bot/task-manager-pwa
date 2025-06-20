@@ -1,0 +1,162 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tasks         Task[]
+  projects      Project[]
+  filterGroups  FilterGroup[]
+  filterItems   FilterItem[]
+
+  @@map("users")
+}
+
+model Task {
+  id               String    @id @default(cuid())
+  title            String
+  description      String?
+  status           TaskStatus @default(TODO)
+  priority         Priority   @default(NONE)
+  dateAdded        DateTime   @default(now())
+  dateModified     DateTime   @updatedAt
+  deadline         DateTime?
+  dateCompleted    DateTime?
+  estimatedTime    Int?      // in minutes
+  actualTimeSpent  Int?      // in minutes
+  createdBy        String
+  tags             String[]
+
+  // Relations
+  user             User      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  projects         ProjectTask[]
+  filterItems      TaskFilter[]
+
+  @@map("tasks")
+}
+
+model Project {
+  id           String        @id @default(cuid())
+  title        String
+  description  String
+  content      String?       // Rich text content
+  status       ProjectStatus @default(ACTIVE)
+  dateCreated  DateTime      @default(now())
+  dateModified DateTime      @updatedAt
+  createdBy    String
+
+  // Relations
+  user         User          @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  tasks        ProjectTask[]
+  filterItems  ProjectFilter[]
+
+  @@map("projects")
+}
+
+model FilterGroup {
+  id        String   @id @default(cuid())
+  name      String
+  color     String
+  sortOrder Int      @default(0)
+  userId    String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     FilterItem[]
+
+  @@map("filter_groups")
+}
+
+model FilterItem {
+  id      String @id @default(cuid())
+  name    String
+  color   String
+  groupId String
+  userId  String
+
+  // Relations
+  group        FilterGroup    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks        TaskFilter[]
+  projects     ProjectFilter[]
+
+  @@map("filter_items")
+}
+
+// Junction tables for many-to-many relationships
+model ProjectTask {
+  projectId String
+  taskId    String
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task      Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, taskId])
+  @@map("project_tasks")
+}
+
+model TaskFilter {
+  taskId       String
+  filterItemId String
+
+  task         Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  filterItem   FilterItem @relation(fields: [filterItemId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, filterItemId])
+  @@map("task_filters")
+}
+
+model ProjectFilter {
+  projectId    String
+  filterItemId String
+
+  project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  filterItem   FilterItem @relation(fields: [filterItemId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, filterItemId])
+  @@map("project_filters")
+}
+
+// Enums
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  ON_HOLD
+  COMPLETE
+  CANCELLED
+
+  @@map("task_status")
+}
+
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+  NONE
+
+  @@map("priority")
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ON_HOLD
+  COMPLETE
+  ARCHIVED
+
+  @@map("project_status")
+}

@@ -7,6 +7,7 @@ interface TaskModalProps {
   show: boolean;
   task: Task | null;
   filterGroups: FilterGroup[];
+  currentUser: { id: string; email: string; name: string } | null;
   onClose: () => void;
   onSave: (task: Task) => void;
 }
@@ -14,7 +15,8 @@ interface TaskModalProps {
 export const TaskModal: React.FC<TaskModalProps> = ({ 
   show, 
   task, 
-  filterGroups, 
+  filterGroups,
+  currentUser,
   onClose, 
   onSave 
 }) => {
@@ -73,7 +75,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       dateCompleted: formData.status === 'complete' ? new Date() : undefined,
       estimatedTime: formData.estimatedTime ? parseInt(formData.estimatedTime) : undefined,
       actualTimeSpent: task?.actualTimeSpent,
-      createdBy: 'user1',
+      createdBy: task ? task.createdBy : (currentUser?.id || 'user1'),
       tags: formData.selectedTags
     };
 

@@ -1,136 +1,15 @@
-import React, { useState } from 'react';
-import { Task, FilterGroup } from './types';
+import React, { useState, useEffect } from 'react';
+import { Task, FilterGroup, Project } from './types';
 import { Navigation } from './components/Navigation';
 import { TaskModal } from './components/TaskModal';
+import { LoginForm } from './components/LoginForm';
 import { Dashboard } from './pages/Dashboard';
 import { TasksPage } from './pages/TasksPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { CalendarPage } from './pages/CalendarPage';
-import { parseLocalDate } from './utils/date';
+import { apiService } from './services/api';
 
-// Sample data with more tasks
-const sampleTasks: Task[] = [
-  {
-    id: '1',
-    title: 'Complete project proposal',
-    description: 'Draft the Q2 project proposal for client review',
-    status: 'in-progress',
-    priority: 'high',
-    dateAdded: parseLocalDate('2024-06-10'),
-    dateModified: parseLocalDate('2024-06-15'),
-    deadline: parseLocalDate('2024-06-20'),
-    createdBy: 'user1',
-    tags: ['urgent', 'bank-of-america', 'quarterly-review']
-  },
-  {
-    id: '2',
-    title: 'Review design mockups',
-    description: 'Provide feedback on the latest UI mockups',
-    status: 'todo',
-    priority: 'medium',
-    dateAdded: parseLocalDate('2024-06-12'),
-    dateModified: parseLocalDate('2024-06-12'),
-    deadline: parseLocalDate('2024-06-18'),
-    createdBy: 'user1',
-    tags: ['design', 'marketing', 'website-redesign']
-  },
-  {
-    id: '3',
-    title: 'Client meeting preparation',
-    description: 'Prepare slides and talking points for Microsoft quarterly review',
-    status: 'todo',
-    priority: 'high',
-    dateAdded: parseLocalDate('2024-06-14'),
-    dateModified: parseLocalDate('2024-06-14'),
-    deadline: parseLocalDate('2024-06-19'),
-    createdBy: 'user1',
-    tags: ['urgent', 'microsoft', 'quarterly-review', 'steve-johnson']
-  },
-  {
-    id: '4',
-    title: 'Update database schema',
-    description: 'Implement new fields for user preferences',
-    status: 'complete',
-    priority: 'low',
-    dateAdded: parseLocalDate('2024-06-08'),
-    dateModified: parseLocalDate('2024-06-13'),
-    dateCompleted: parseLocalDate('2024-06-13'),
-    createdBy: 'user1',
-    tags: ['backend', 'engineering', 'john-doe']
-  },
-  {
-    id: '5',
-    title: 'Code review for authentication module',
-    description: 'Review PR #234 for security best practices',
-    status: 'in-progress',
-    priority: 'medium',
-    dateAdded: parseLocalDate('2024-06-15'),
-    dateModified: parseLocalDate('2024-06-16'),
-    deadline: parseLocalDate('2024-06-17'),
-    createdBy: 'user1',
-    tags: ['backend', 'engineering', 'security', 'sarah-williams']
-  },
-  {
-    id: '6',
-    title: 'Write blog post about new features',
-    description: 'Draft announcement for v2.0 release',
-    status: 'on-hold',
-    priority: 'low',
-    dateAdded: parseLocalDate('2024-06-11'),
-    dateModified: parseLocalDate('2024-06-14'),
-    deadline: parseLocalDate('2024-06-25'),
-    createdBy: 'user1',
-    tags: ['content', 'marketing', 'website-redesign']
-  },
-  {
-    id: '7',
-    title: 'Fix responsive design issues',
-    description: 'Mobile menu not working properly on iOS devices',
-    status: 'todo',
-    priority: 'high',
-    dateAdded: parseLocalDate('2024-06-16'),
-    dateModified: parseLocalDate('2024-06-16'),
-    deadline: parseLocalDate('2024-06-18'),
-    createdBy: 'user1',
-    tags: ['bug', 'design', 'engineering', 'urgent']
-  },
-  {
-    id: '8',
-    title: 'Quarterly tax preparation',
-    description: 'Gather all receipts and documents for Q2 filing',
-    status: 'todo',
-    priority: 'medium',
-    dateAdded: parseLocalDate('2024-06-10'),
-    dateModified: parseLocalDate('2024-06-10'),
-    deadline: parseLocalDate('2024-06-30'),
-    createdBy: 'user1',
-    tags: ['finance', 'quarterly-review']
-  },
-  {
-    id: '9',
-    title: 'Onboard new team member',
-    description: 'Set up accounts and schedule orientation for new developer',
-    status: 'todo',
-    priority: 'medium',
-    dateAdded: parseLocalDate('2024-06-15'),
-    dateModified: parseLocalDate('2024-06-15'),
-    deadline: parseLocalDate('2024-06-22'),
-    createdBy: 'user1',
-    tags: ['hr', 'john-doe', 'microsoft']
-  },
-  {
-    id: '10',
-    title: 'Performance optimization',
-    description: 'Analyze and improve slow database queries',
-    status: 'cancelled',
-    priority: 'low',
-    dateAdded: parseLocalDate('2024-06-05'),
-    dateModified: parseLocalDate('2024-06-12'),
-    createdBy: 'user1',
-    tags: ['backend', 'engineering']
-  }
-];
-
+// Sample filter groups for fallback (will be replaced by API data)
 const sampleFilterGroups: FilterGroup[] = [
   {
     id: 'tags',
@@ -183,60 +62,271 @@ const sampleFilterGroups: FilterGroup[] = [
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('dashboard');
-  
-  // Load data from localStorage or use sample data
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    const savedTasks = localStorage.getItem('taskManagerTasks');
-    if (savedTasks) {
-      const parsedTasks = JSON.parse(savedTasks);
-      // Convert date strings back to Date objects
-      return parsedTasks.map((task: any) => ({
-        ...task,
-        dateAdded: new Date(task.dateAdded),
-        dateModified: new Date(task.dateModified),
-        deadline: task.deadline ? new Date(task.deadline) : undefined,
-        dateCompleted: task.dateCompleted ? new Date(task.dateCompleted) : undefined
-      }));
-    }
-    return sampleTasks;
-  });
-  
-  const [filterGroups, setFilterGroups] = useState<FilterGroup[]>(() => {
-    const savedGroups = localStorage.getItem('taskManagerFilterGroups');
-    return savedGroups ? JSON.parse(savedGroups) : sampleFilterGroups;
-  });
-  
+  const [currentUser, setCurrentUser] = useState(apiService.getCurrentUser());
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [filterGroups, setFilterGroups] = useState<FilterGroup[]>(sampleFilterGroups);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
 
-  // Save to localStorage whenever data changes
-  React.useEffect(() => {
-    localStorage.setItem('taskManagerTasks', JSON.stringify(tasks));
-  }, [tasks]);
+  // Check API connection on mount
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const isHealthy = await apiService.healthCheck();
+        setConnectionStatus(isHealthy ? 'connected' : 'disconnected');
+      } catch (error) {
+        setConnectionStatus('disconnected');
+      }
+    };
 
-  React.useEffect(() => {
-    localStorage.setItem('taskManagerFilterGroups', JSON.stringify(filterGroups));
-  }, [filterGroups]);
+    checkConnection();
+  }, []);
+
+  // Load user data when user is authenticated
+  useEffect(() => {
+    if (currentUser && connectionStatus === 'connected') {
+      loadUserData();
+    }
+  }, [currentUser, connectionStatus]);
+
+  const loadUserData = async () => {
+    setIsLoading(true);
+    try {
+      // Load tasks, projects, and filter groups in parallel
+      const [tasksData, projectsData, filterGroupsData] = await Promise.all([
+        apiService.getTasks().catch(err => {
+          console.error('Failed to load tasks:', err);
+          return [];
+        }),
+        apiService.getProjects().catch(err => {
+          console.error('Failed to load projects:', err);
+          return [];
+        }),
+        apiService.getFilterGroups().catch(err => {
+          console.error('Failed to load filter groups:', err);
+          return sampleFilterGroups;
+        })
+      ]);
+
+      setTasks(tasksData);
+      setProjects(projectsData);
+      setFilterGroups(filterGroupsData.length > 0 ? filterGroupsData : sampleFilterGroups);
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogin = (user: any) => {
+    setCurrentUser(user);
+  };
+
+  const handleLogout = () => {
+    apiService.logout();
+    setCurrentUser(null);
+    setTasks([]);
+    setProjects([]);
+    setFilterGroups(sampleFilterGroups);
+    setCurrentPage('dashboard');
+  };
 
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
     setShowTaskModal(true);
   };
 
-  const handleTaskSave = (taskData: Task) => {
-    if (selectedTask) {
-      setTasks(tasks.map(task => task.id === selectedTask.id ? taskData : task));
-    } else {
-      setTasks([...tasks, taskData]);
+  const handleTaskSave = async (taskData: Task) => {
+    try {
+      console.log('Saving task data:', taskData);
+      
+      // Ensure createdBy is set to current user
+      const taskWithUser = {
+        ...taskData,
+        createdBy: currentUser?.id || taskData.createdBy
+      };
+      
+      if (selectedTask) {
+        // Update existing task
+        const updatedTask = await apiService.updateTask(selectedTask.id, taskWithUser);
+        setTasks(tasks.map(task => task.id === selectedTask.id ? updatedTask : task));
+      } else {
+        // Create new task
+        const newTask = await apiService.createTask(taskWithUser);
+        setTasks([...tasks, newTask]);
+      }
+      setShowTaskModal(false);
+      setSelectedTask(null);
+    } catch (error) {
+      console.error('Error saving task:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert('Failed to save task: ' + errorMessage);
     }
-    setShowTaskModal(false);
-    setSelectedTask(null);
+  };
+
+  const handleTaskDelete = async (taskId: string) => {
+    try {
+      await apiService.deleteTask(taskId);
+      setTasks(tasks.filter(task => task.id !== taskId));
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
   };
 
   const handleTaskModalClose = () => {
     setShowTaskModal(false);
     setSelectedTask(null);
   };
+
+  // Show login form if user is not authenticated
+  if (!currentUser) {
+    return <LoginForm onLogin={handleLogin} />;
+  }
+
+  // Show connection status while checking
+  if (connectionStatus === 'checking') {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f9fafb'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            border: '4px solid #e5e7eb',
+            borderTop: '4px solid #3b82f6',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 16px'
+          }}></div>
+          <p style={{ color: '#6b7280', fontSize: '16px' }}>
+            Connecting to server...
+          </p>
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
+      </div>
+    );
+  }
+
+  // Show offline mode if disconnected
+  if (connectionStatus === 'disconnected') {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f9fafb'
+      }}>
+        <div style={{
+          backgroundColor: 'white',
+          padding: '48px',
+          borderRadius: '12px',
+          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+          textAlign: 'center',
+          maxWidth: '400px'
+        }}>
+          <div style={{
+            fontSize: '48px',
+            marginBottom: '16px'
+          }}>⚠️</div>
+          <h2 style={{
+            fontSize: '24px',
+            fontWeight: '600',
+            color: '#1f2937',
+            marginBottom: '8px'
+          }}>
+            Connection Failed
+          </h2>
+          <p style={{
+            color: '#6b7280',
+            marginBottom: '24px'
+          }}>
+            Unable to connect to the server. Please make sure your backend is running on localhost:8000
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              padding: '12px 24px',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
+          >
+            Retry Connection
+          </button>
+          <div style={{
+            marginTop: '24px',
+            padding: '16px',
+            backgroundColor: '#f3f4f6',
+            borderRadius: '8px',
+            fontSize: '14px',
+            color: '#6b7280',
+            textAlign: 'left'
+          }}>
+            <p style={{ margin: 0, marginBottom: '8px' }}>
+              <strong>To start the backend:</strong>
+            </p>
+            <code style={{
+              display: 'block',
+              backgroundColor: '#1f2937',
+              color: '#f9fafb',
+              padding: '8px',
+              borderRadius: '4px',
+              fontSize: '12px'
+            }}>
+              cd D:\dev\task-manager-pwa\backend<br/>
+              npm run dev
+            </code>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading screen
+  if (isLoading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f9fafb'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            border: '4px solid #e5e7eb',
+            borderTop: '4px solid #3b82f6',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 16px'
+          }}></div>
+          <p style={{ color: '#6b7280', fontSize: '16px' }}>
+            Loading your data...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Render current page
   const renderCurrentPage = () => {
@@ -287,6 +377,40 @@ const App = () => {
         currentPage={currentPage} 
         onPageChange={setCurrentPage} 
       />
+      
+      {/* User info and logout button */}
+      <div style={{
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        backgroundColor: 'white',
+        padding: '8px 16px',
+        borderRadius: '8px',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+        zIndex: 1000
+      }}>
+        <span style={{ fontSize: '14px', color: '#6b7280' }}>
+          {currentUser?.name || currentUser?.email}
+        </span>
+        <button
+          onClick={handleLogout}
+          style={{
+            backgroundColor: '#ef4444',
+            color: 'white',
+            border: 'none',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            cursor: 'pointer'
+          }}
+        >
+          Logout
+        </button>
+      </div>
+
       <main style={{ 
         marginLeft: '320px', 
         padding: '24px',
@@ -294,10 +418,12 @@ const App = () => {
       }}>
         {renderCurrentPage()}
       </main>
+      
       <TaskModal
         show={showTaskModal}
         task={selectedTask}
         filterGroups={filterGroups}
+        currentUser={currentUser}
         onClose={handleTaskModalClose}
         onSave={handleTaskSave}
       />
